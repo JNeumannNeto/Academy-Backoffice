@@ -38,11 +38,28 @@ export const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: false,
   
   setAuth: (usuario, token) => {
+    // Validar dados antes de salvar
+    if (!usuario || !usuario.id || !usuario.nome || !usuario.email || !usuario.tipo) {
+      console.error('Tentativa de salvar dados de usuário inválidos:', usuario);
+      throw new Error('Dados de usuário inválidos');
+    }
+    
+    if (!token || typeof token !== 'string' || token.trim().length === 0) {
+      console.error('Token inválido:', token);
+      throw new Error('Token inválido');
+    }
+
     if (typeof window !== 'undefined') {
-      localStorage.setItem('token', token);
-      localStorage.setItem('usuario', JSON.stringify(usuario));
-      // Também salva em cookie para o middleware
-      setCookie('token', token);
+      try {
+        localStorage.setItem('token', token);
+        localStorage.setItem('usuario', JSON.stringify(usuario));
+        // Também salva em cookie para o middleware
+        setCookie('token', token);
+        console.log('Autenticação salva com sucesso:', { usuario: usuario.nome, email: usuario.email });
+      } catch (error) {
+        console.error('Erro ao salvar no localStorage:', error);
+        throw new Error('Erro ao salvar dados de autenticação');
+      }
     }
     set({ usuario, token, isAuthenticated: true });
   },
@@ -58,18 +75,43 @@ export const useAuthStore = create<AuthState>((set) => ({
   
   initAuth: () => {
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('token');
-      const usuarioStr = localStorage.getItem('usuario');
-      
-      if (token && usuarioStr) {
-        try {
+      try {
+        const token = localStorage.getItem('token');
+        const usuarioStr = localStorage.getItem('usuario');
+        
+        if (token && usuarioStr) {
+          // Verificar se não está vazio ou corrompido
+          if (usuarioStr.trim().length === 0 || usuarioStr === 'undefined' || usuarioStr === 'null') {
+            throw new Error('Dados de usuário vazios ou inválidos');
+          }
+
           const usuario = JSON.parse(usuarioStr);
-      // Atualiza o cookie também
-          setCookie('token', token);
-          set({ usuario, token, isAuthenticated: true });
-        } catch (error) {
-          console.error('Erro ao parsear usuário:', error);
+          
+          // Validar se o objeto parseado tem os campos necessários
+          if (usuario && usuario.id && usuario.nome && usuario.email && usuario.tipo) {
+            // Atualiza o cookie também
+            setCookie('token', token);
+            set({ usuario, token, isAuthenticated: true });
+          } else {
+            // Dados inválidos, limpar
+            console.warn('Dados de usuário inválidos no localStorage');
+            throw new Error('Estrutura de usuário inválida');
+          }
+        } else {
+          // Sem dados de autenticação
+          set({ usuario: null, token: null, isAuthenticated: false });
         }
+      } catch (error) {
+        console.error('Erro ao inicializar autenticação:', error);
+        // Limpar localStorage corrompido
+        try {
+          localStorage.removeItem('token');
+          localStorage.removeItem('usuario');
+          deleteCookie('token');
+        } catch (cleanupError) {
+          console.error('Erro ao limpar localStorage:', cleanupError);
+        }
+        set({ usuario: null, token: null, isAuthenticated: false });
       }
     }
   },

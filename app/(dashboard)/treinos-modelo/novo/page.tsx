@@ -25,7 +25,6 @@ export default function NovoTreinoModeloPage() {
   const [equipamentos, setEquipamentos] = useState<Equipamento[]>([]);
   const [objetivosSelecionados, setObjetivosSelecionados] = useState<string[]>([]);
   const [treinos, setTreinos] = useState<Treino[]>([{
-    cor: '#3B82F6',
     partes: [],
     observacoes: ''
   }]);
@@ -96,7 +95,6 @@ export default function NovoTreinoModeloPage() {
       const payload = {
         nome: data.nome,
         descricao: data.descricao || '',
-        cor: treino.cor,
         partes: treino.partes,
         observacoes: treino.observacoes || '',
         objetivos: objetivosSelecionados
@@ -183,7 +181,7 @@ export default function NovoTreinoModeloPage() {
 
             {/* Objetivos */}
             <MultiSelect
-              options={objetivos.map(obj => ({ value: obj.nome, label: obj.nome }))}
+              options={objetivos.map(obj => ({ value: obj._id, label: obj.nome }))}
               value={objetivosSelecionados}
               onChange={setObjetivosSelecionados}
               placeholder="Selecione os objetivos..."

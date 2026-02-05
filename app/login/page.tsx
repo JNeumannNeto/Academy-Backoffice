@@ -23,11 +23,14 @@ export default function LoginPage() {
     try {
       const { data } = await api.post('/api/auth/login', { email, senha });
   
-      if (data.sucesso) {
-        setAuth(data.dados, data.token);
+      if (data.sucesso && data.usuario && data.token) {
+        console.log('Dados recebidos do login:', { usuario: data.usuario, token: data.token });
+        setAuth(data.usuario, data.token);
         // Redireciona para a página inicial (que é o dashboard)
         router.replace('/');
-}
+      } else {
+        setError('Resposta inválida do servidor');
+      }
     } catch (err) {
       const axiosError = err as AxiosError<{ mensagem?: string }>;
       setError(axiosError.response?.data?.mensagem || 'Erro ao fazer login');

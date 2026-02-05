@@ -157,7 +157,7 @@ const removeSerie = (idx: number) => {
         >
            <option value="">Selecione...</option>
  {objetivos.map(obj => (
-           <option key={obj._id} value={obj.nome}>{obj.nome}</option>
+           <option key={obj._id} value={obj._id}>{obj.nome}</option>
       ))}
 </select>
             </div>
@@ -174,7 +174,7 @@ const removeSerie = (idx: number) => {
               >
          <option value="">Selecione...</option>
     {equipamentos.map(eq => (
-          <option key={eq._id} value={eq.nome}>{eq.nome}</option>
+          <option key={eq._id} value={eq._id}>{eq.nome}</option>
     ))}
     </select>
             </div>

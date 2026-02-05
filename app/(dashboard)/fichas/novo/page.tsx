@@ -158,6 +158,10 @@ export default function NovaFichaPage() {
 
     if (treinosSelecionados.length === 0) {
       setError('Selecione pelo menos um treino modelo');
+      return;
+    }
+
+    setSaving(true);
 
     try {
       const payload = {
@@ -176,11 +180,11 @@ export default function NovaFichaPage() {
       if (response.data.sucesso) {
         router.push('/fichas');
       }
- } catch (err: unknown) {
+    } catch (err: unknown) {
       const error = err as { response?: { data?: { mensagem?: string } } };
       setError(error.response?.data?.mensagem || 'Erro ao criar ficha');
     } finally {
- setSaving(false);
+      setSaving(false);
     }
   };
 
@@ -194,7 +198,7 @@ export default function NovaFichaPage() {
 
   const alunoInfo = alunos.find(a => a._id === alunoSelecionado);
 
-return (
+  return (
     <div className="max-w-5xl mx-auto space-y-6 pb-12">
       {/* Header */}
       <div className="flex items-center gap-4">
@@ -437,6 +441,4 @@ return (
       </form>
     </div>
   );
-}
-
 }

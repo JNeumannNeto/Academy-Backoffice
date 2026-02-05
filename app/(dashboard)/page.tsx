@@ -1,7 +1,8 @@
 ﻿'use client';
 
 import { useAuthStore } from '@/lib/store';
-import { Users, FileText, Activity, TrendingUp } from 'lucide-react';
+import { Users, FileText, Activity, TrendingUp, Layers } from 'lucide-react';
+import Link from 'next/link';
 
 export default function DashboardPage() {
   const { usuario } = useAuthStore();
@@ -49,19 +50,35 @@ Bem-vindo, {usuario?.nome}!
         <h2 className="text-xl font-bold text-gray-900 mb-4">
           Ações Rápidas
         </h2>
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-   <button className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition">
-  <Users className="mx-auto mb-2" size={32} />
-         <p className="font-medium">Criar Aluno</p>
-    </button>
- <button className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-green-500 hover:bg-green-50 transition">
-  <FileText className="mx-auto mb-2" size={32} />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Link
+            href="/usuarios/novo"
+            className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition text-center"
+          >
+            <Users className="mx-auto mb-2" size={32} />
+            <p className="font-medium">Criar Aluno</p>
+          </Link>
+          <Link
+            href="/fichas/novo"
+            className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-green-500 hover:bg-green-50 transition text-center"
+          >
+            <FileText className="mx-auto mb-2" size={32} />
             <p className="font-medium">Nova Ficha</p>
-</button>
-        <button className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition">
-        <Activity className="mx-auto mb-2" size={32} />
-  <p className="font-medium">Ver Relatórios</p>
-    </button>
+          </Link>
+          <Link
+            href="/treinos-modelo"
+            className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition text-center"
+          >
+            <Layers className="mx-auto mb-2" size={32} />
+            <p className="font-medium">Treinos Modelo</p>
+          </Link>
+          <Link
+            href="/relatorios"
+            className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition text-center"
+          >
+            <TrendingUp className="mx-auto mb-2" size={32} />
+            <p className="font-medium">Ver Relatórios</p>
+          </Link>
         </div>
   </div>
     </div>

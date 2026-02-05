@@ -21,14 +21,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Redireciona apenas depois da inicialização
   useEffect(() => {
     if (isInitialized) {
+      console.log('AuthProvider - Estado:', { isAuthenticated, pathname });
+      
       // Rotas públicas que não precisam de autenticação
       const publicRoutes = ['/login'];
       const isPublicRoute = publicRoutes.includes(pathname);
 
       if (!isAuthenticated && !isPublicRoute) {
+        console.log('AuthProvider - Redirecionando para login');
         router.replace('/login');
       } else if (isAuthenticated && pathname === '/login') {
-        router.replace('/');
+        console.log('AuthProvider - Redirecionando para dashboard');
+        router.push('/');
       }
     }
   }, [isAuthenticated, pathname, router, isInitialized]);

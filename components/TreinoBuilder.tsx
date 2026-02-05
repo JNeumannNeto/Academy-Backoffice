@@ -27,7 +27,6 @@ const CORES_TREINO = [
 export function TreinoBuilder({ treinos, onChange, objetivos, equipamentos }: TreinoBuilderProps) {
   // Força o treino modelo a ter apenas UM treino (treinos[0])
   const treino = treinos[0] || {
-    cor: CORES_TREINO[0].value,
     partes: [{ exercicios: [] }],
     observacoes: ''
   };
@@ -98,8 +97,8 @@ export function TreinoBuilder({ treinos, onChange, objetivos, equipamentos }: Tr
   const ordenarExerciciosPorCategoria = (parteIndex: number) => {
     const parte = treino.partes[parteIndex];
     const exerciciosOrdenados = [...parte.exercicios].sort((a, b) => {
-      const objA = objetivos.find(o => o.nome === a.objetivo);
-      const objB = objetivos.find(o => o.nome === b.objetivo);
+      const objA = objetivos.find(o => o._id === a.objetivo);
+      const objB = objetivos.find(o => o._id === b.objetivo);
       const ordem: Record<string, number> = {
         'aerobico_aquecimento': 1,
         'dinamico': 2,
@@ -123,31 +122,12 @@ export function TreinoBuilder({ treinos, onChange, objetivos, equipamentos }: Tr
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-gray-900">Treino Modelo</h3>
-      <div className="bg-white rounded-lg shadow p-4">
-        {/* Renderizar partes e exercícios do treino modelo único */}
-        {/* ...restante do código permanece igual, mas agora só há um treino */}
-      </div>
-
       {/* Treino modelo único */}
       <div className="border border-gray-300 rounded-lg overflow-hidden">
         <div className="bg-gray-50 p-4 flex items-center gap-4">
           <div className="flex items-center gap-3">
-            <div
-              className="w-8 h-8 rounded-full border-2 border-gray-300"
-              style={{ backgroundColor: treino.cor }}
-            />
             <h4 className="font-semibold text-gray-900">Treino Modelo</h4>
           </div>
-          <select
-            value={treino.cor}
-            onChange={e => setTreino({ ...treino, cor: e.target.value })}
-            className="px-3 py-1 border border-gray-300 rounded-lg text-sm"
-          >
-            {CORES_TREINO.map(cor => (
-              <option key={cor.value} value={cor.value}>{cor.label}</option>
-            ))}
-          </select>
         </div>
         <div className="p-4 space-y-4">
           {/* Partes */}

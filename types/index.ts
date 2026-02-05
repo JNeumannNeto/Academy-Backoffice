@@ -29,7 +29,7 @@ export interface Parte {
 
 export interface Treino {
   _id?: string;
-  cor: string;
+  cor?: string;
   partes: Parte[];
   observacoes?: string;
 }
