@@ -93,26 +93,49 @@ try {
 
       // Ficha
       if (fichaRes.data.sucesso) {
-    const ficha = fichaRes.data.ficha;
-  setFichaOriginal(ficha);
+        const ficha = fichaRes.data.dados;
+        setFichaOriginal(ficha);
+
+        console.log('📥 Ficha carregada:', ficha);
 
         // Preencher formulário
         reset({
-   alunoId: ficha.aluno._id,
-  professorReferenciaId: ficha.professorReferencia._id,
+          alunoId: ficha.aluno._id,
+          professorReferenciaId: ficha.professorReferencia._id,
           dataInicio: ficha.dataInicio.split('T')[0],
           dataValidade: ficha.dataValidade.split('T')[0],
-    anotacoesNutricao: ficha.anotacoesNutricao || ''
-     });
+          anotacoesNutricao: ficha.anotacoesNutricao || ''
+        });
 
-   // Anamnese
-  setAnamnese(ficha.anamnese);
+        // Anamnese
+        setAnamnese(ficha.anamnese);
 
         // Objetivos
-     setObjetivosSelecionados(ficha.objetivos);
+        setObjetivosSelecionados(ficha.objetivos);
 
-        // Treinos
-        setTreinos(ficha.treinos);
+        // Normalizar treinos: converter objetivo e equipamento para IDs
+        const treinosNormalizados = ficha.treinos?.map((treino: any) => ({
+          _id: treino._id,
+          cor: treino.cor,
+          nome: treino.nome,
+          partes: treino.partes?.map((parte: any) => ({
+            nome: parte.nome,
+            exercicios: parte.exercicios?.map((ex: any) => ({
+              objetivo: typeof ex.objetivo === 'string' ? ex.objetivo : ex.objetivo?._id || '',
+              equipamento: typeof ex.equipamento === 'string' ? ex.equipamento : ex.equipamento?._id || '',
+              tipo: ex.tipo || 'series',
+              series: ex.series || [],
+              repeticoes: ex.repeticoes || [],
+              tempoSegundos: ex.tempoSegundos,
+              detalhes: ex.detalhes || '',
+              ordem: ex.ordem
+            })) || [],
+            exerciciosJuntos: parte.exerciciosJuntos
+          })) || [],
+          observacoes: treino.observacoes || ''
+        })) || [];
+
+        setTreinos(treinosNormalizados);
       }
 
       // Usuários
@@ -122,14 +145,14 @@ try {
         setProfessores(usuarios.filter((u: Usuario) => u.tipo === 'professor' && u.ativo));
       }
 
- // Objetivos
+      // Objetivos
       if (objetivosRes.data.sucesso) {
- setObjetivos(objetivosRes.data.objetivos.filter((o: Objetivo) => o.ativo));
+        setObjetivos(objetivosRes.data.dados.filter((o: Objetivo) => o.ativo));
       }
 
-  // Equipamentos
+      // Equipamentos
       if (equipamentosRes.data.sucesso) {
-        setEquipamentos(equipamentosRes.data.equipamentos.filter((e: Equipamento) => e.ativo));
+        setEquipamentos(equipamentosRes.data.dados.filter((e: Equipamento) => e.ativo));
       }
     } catch (err) {
       console.error('Erro ao carregar dados:', err);

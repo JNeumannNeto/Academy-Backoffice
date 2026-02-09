@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Plus, Eye, Edit, Calendar, User, AlertCircle } from 'lucide-react';
+import { Search, Plus, Eye, Edit, Calendar, User, AlertCircle, Trash2 } from 'lucide-react';
 import api from '@/lib/api';
 import { Ficha } from '@/types';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
@@ -15,8 +15,9 @@ export default function FichasPage() {
   const { usuario } = useAuthStore();
   const [fichas, setFichas] = useState<Ficha[]>([]);
   const [loading, setLoading] = useState(true);
-const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [filtroStatus, setFiltroStatus] = useState<'todas' | 'ativas' | 'vencidas'>('todas');
+  const [excluindo, setExcluindo] = useState<string | null>(null);
 
   useEffect(() => {
     carregarFichas();
@@ -26,17 +27,37 @@ const [searchTerm, setSearchTerm] = useState('');
     try {
       setLoading(true);
       const { data } = await api.get('/api/fichas');
-  if (data.sucesso) {
+      if (data.sucesso) {
         // A API retorna 'dados' e não 'fichas'
         setFichas(data.dados || []);
       } else {
         setFichas([]);
       }
     } catch (error) {
-    console.error('Erro ao carregar fichas:', error);
+      console.error('Erro ao carregar fichas:', error);
       setFichas([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const excluirFicha = async (fichaId: string, alunoNome: string) => {
+    if (!confirm(`Tem certeza que deseja excluir a ficha de ${alunoNome}? Esta ação não pode ser desfeita.`)) {
+      return;
+    }
+
+    try {
+      setExcluindo(fichaId);
+      const { data } = await api.delete(`/api/fichas/${fichaId}`);
+      if (data.sucesso) {
+        // Recarregar lista
+        await carregarFichas();
+      }
+    } catch (error: any) {
+      console.error('Erro ao excluir ficha:', error);
+      alert(error.response?.data?.mensagem || 'Erro ao excluir ficha');
+    } finally {
+      setExcluindo(null);
     }
   };
 
@@ -210,13 +231,22 @@ return (
        <span>Ver</span>
                 </button>
                 {podeAdicionar && (
-     <button
-         onClick={() => router.push(`/fichas/${ficha._id}/editar`)}
-         className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-       >
-<Edit size={16} />
-        <span>Editar</span>
-         </button>
+                  <>
+                    <button
+                      onClick={() => router.push(`/fichas/${ficha._id}/editar`)}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                    >
+                      <Edit size={16} />
+                      <span>Editar</span>
+                    </button>
+                    <button
+                      onClick={() => excluirFicha(ficha._id, ficha.aluno.nome)}
+                      disabled={excluindo === ficha._id}
+                      className="flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition disabled:bg-gray-400"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </>
        )}
    </div>
     </div>

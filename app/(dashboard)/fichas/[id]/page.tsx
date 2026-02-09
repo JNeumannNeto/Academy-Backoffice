@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ArrowLeft, Edit, Calendar, User, Target, Dumbbell } from 'lucide-react';
+import { ArrowLeft, Edit, Calendar, User, Target, Trash2 } from 'lucide-react';
 import api from '@/lib/api';
 import { Ficha } from '@/types';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
@@ -18,25 +18,43 @@ const router = useRouter();
 
   const [ficha, setFicha] = useState<Ficha | null>(null);
   const [loading, setLoading] = useState(true);
+  const [excluindo, setExcluindo] = useState(false);
 
   useEffect(() => {
-  carregarFicha();
+    carregarFicha();
   }, [id]);
 
   const carregarFicha = async () => {
     try {
       setLoading(true);
-const { data } = await api.get(`/api/fichas/${id}`);
+      const { data } = await api.get(`/api/fichas/${id}`);
       if (data.sucesso) {
-   setFicha(data.ficha);
+        setFicha(data.dados);
       }
     } catch (error) {
-  console.error('Erro ao carregar ficha:', error);
-  } finally {
+      console.error('Erro ao carregar ficha:', error);
+    } finally {
       setLoading(false);
-  }
+    }
   };
 
+  const excluirFicha = async () => {
+    if (!confirm('Tem certeza que deseja excluir esta ficha? Esta ação não pode ser desfeita.')) {
+      return;
+    }
+
+    try {
+      setExcluindo(true);
+      const { data } = await api.delete(`/api/fichas/${id}`);
+      if (data.sucesso) {
+        router.push('/fichas');
+      }
+    } catch (error: any) {
+      console.error('Erro ao excluir ficha:', error);
+      alert(error.response?.data?.mensagem || 'Erro ao excluir ficha');
+    } finally {
+      setExcluindo(false);
+    }
   const podeEditar = usuario?.tipo === 'administrador' || usuario?.tipo === 'professor';
 
   if (loading) {
@@ -79,13 +97,23 @@ const { data } = await api.get(`/api/fichas/${id}`);
   </div>
 
    {podeEditar && (
+        <div className="flex gap-2">
           <button
-    onClick={() => router.push(`/fichas/${id}/editar`)}
-  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            onClick={() => router.push(`/fichas/${id}/editar`)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
           >
-      <Edit size={20} />
-   <span>Editar Ficha</span>
-       </button>
+            <Edit size={20} />
+            <span>Editar Ficha</span>
+          </button>
+          <button
+            onClick={excluirFicha}
+            disabled={excluindo}
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition disabled:bg-gray-400"
+          >
+            <Trash2 size={20} />
+            <span>{excluindo ? 'Excluindo...' : 'Excluir'}</span>
+          </button>
+        </div>
       )}
  </div>
 
