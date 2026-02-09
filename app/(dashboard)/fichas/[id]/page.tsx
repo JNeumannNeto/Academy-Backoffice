@@ -215,6 +215,7 @@ const router = useRouter();
      </div>
    </div>
       </div>
+    </div>
 
       {/* Objetivos */}
       <div className="bg-white rounded-lg shadow p-6">
