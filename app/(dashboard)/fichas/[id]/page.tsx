@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ArrowLeft, Edit, Calendar, User, Target, Trash2 } from 'lucide-react';
+import { ArrowLeft, Edit, Calendar, User, Target, Trash2, Dumbbell } from 'lucide-react';
 import api from '@/lib/api';
 import { Ficha } from '@/types';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
@@ -55,6 +55,8 @@ const router = useRouter();
     } finally {
       setExcluindo(false);
     }
+  };
+
   const podeEditar = usuario?.tipo === 'administrador' || usuario?.tipo === 'professor';
 
   if (loading) {
@@ -215,7 +217,6 @@ const router = useRouter();
      </div>
    </div>
       </div>
-    </div>
 
       {/* Objetivos */}
       <div className="bg-white rounded-lg shadow p-6">
