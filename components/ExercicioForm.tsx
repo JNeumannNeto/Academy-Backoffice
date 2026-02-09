@@ -68,28 +68,33 @@ export function ExercicioForm({
   }, []);
 
   const updateField = <K extends keyof Exercicio>(field: K, value: Exercicio[K]) => {
+    console.log(`🔧 Atualizando campo ${String(field)}:`, value);
     onChange({ ...exercicio, [field]: value });
   };
 
   const updateTipoExercicio = (novoTipo: 'series' | 'tempo') => {
     if (novoTipo === 'series') {
-      onChange({
+      const updated = {
         ...exercicio,
-        tipo: 'series',
+        tipo: 'series' as const,
         series: exercicio.series?.length ? exercicio.series : [10],
         repeticoes: exercicio.repeticoes?.length ? exercicio.repeticoes : [10],
         tempoSegundos: undefined
-      });
+      };
+      console.log('🔄 Mudando para séries:', updated);
+      onChange(updated);
       setMinutos(0);
       setSegundos(0);
     } else {
-      onChange({
+      const updated = {
         ...exercicio,
-        tipo: 'tempo',
+        tipo: 'tempo' as const,
         tempoSegundos: (minutos * 60) + segundos || 300, // 5 min default
         series: [],
         repeticoes: []
-      });
+      };
+      console.log('🔄 Mudando para tempo:', updated);
+      onChange(updated);
     }
   };
 
@@ -97,6 +102,7 @@ export function ExercicioForm({
     setMinutos(mins);
     setSegundos(secs);
     const totalSegundos = (mins * 60) + secs;
+    console.log(`⏱️ Atualizando tempo: ${mins}min ${secs}seg = ${totalSegundos}s`);
     onChange({
       ...exercicio,
       tempoSegundos: totalSegundos

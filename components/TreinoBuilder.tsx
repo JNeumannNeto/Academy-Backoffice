@@ -57,6 +57,7 @@ export function TreinoBuilder({ treinos, onChange, objetivos, equipamentos }: Tr
     const novoExercicio: Exercicio = {
       objetivo: '',
       equipamento: '',
+      tipo: 'series',
       series: [3],
       repeticoes: [12],
       detalhes: '',

@@ -58,6 +58,8 @@ export default function EditarTreinoModeloPage() {
       if (treinoRes.data.sucesso) {
         const treino = treinoRes.data.dados;
         
+        console.log('📥 Treino carregado do backend:', treino);
+        
         // Preencher formulário
         setValue('nome', treino.nome);
         setValue('descricao', treino.descricao || '');
@@ -68,9 +70,27 @@ export default function EditarTreinoModeloPage() {
         ) || [];
         setObjetivosSelecionados(objetivoIds);
 
+        // Normalizar partes: converter objetivo e equipamento para IDs
+        const partesNormalizadas = treino.partes?.map((parte: any) => ({
+          nome: parte.nome,
+          exercicios: parte.exercicios?.map((ex: any) => ({
+            objetivo: typeof ex.objetivo === 'string' ? ex.objetivo : ex.objetivo?._id || '',
+            equipamento: typeof ex.equipamento === 'string' ? ex.equipamento : ex.equipamento?._id || '',
+            tipo: ex.tipo || 'series',
+            series: ex.series || [],
+            repeticoes: ex.repeticoes || [],
+            tempoSegundos: ex.tempoSegundos,
+            detalhes: ex.detalhes || '',
+            ordem: ex.ordem
+          })) || [],
+          exerciciosJuntos: parte.exerciciosJuntos
+        })) || [];
+
+        console.log('🔄 Partes normalizadas:', partesNormalizadas);
+
         // Preparar treino para o builder
         setTreinos([{
-          partes: treino.partes || [],
+          partes: partesNormalizadas,
           observacoes: treino.observacoes || ''
         }]);
       }
@@ -124,13 +144,17 @@ export default function EditarTreinoModeloPage() {
         objetivos: objetivosSelecionados
       };
 
+      console.log('📤 Payload atualização:', JSON.stringify(payload, null, 2));
+
       const response = await api.put(`/api/treinos-modelo/${treinoId}`, payload);
 
       if (response.data.sucesso) {
+        console.log('✅ Treino atualizado:', response.data.dados);
         router.push('/treinos-modelo');
       }
     } catch (err: any) {
       const mensagem = err.response?.data?.mensagem || 'Erro ao atualizar treino modelo';
+      console.error('❌ Erro ao atualizar:', err.response?.data || err);
       setError(mensagem);
     } finally {
       setSaving(false);

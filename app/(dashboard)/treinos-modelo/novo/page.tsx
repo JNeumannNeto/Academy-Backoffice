@@ -100,13 +100,17 @@ export default function NovoTreinoModeloPage() {
         objetivos: objetivosSelecionados
       };
 
+      console.log('📤 Payload enviado:', JSON.stringify(payload, null, 2));
+
       const response = await api.post('/api/treinos-modelo', payload);
 
       if (response.data.sucesso) {
+        console.log('✅ Treino salvo:', response.data.dados);
         router.push('/treinos-modelo');
       }
     } catch (err: any) {
       const mensagem = err.response?.data?.mensagem || 'Erro ao criar treino modelo';
+      console.error('❌ Erro ao salvar:', err.response?.data || err);
       setError(mensagem);
     } finally {
       setSaving(false);
