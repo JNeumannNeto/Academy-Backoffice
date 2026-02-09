@@ -2,7 +2,7 @@
 
 import { Trash2, GripVertical, Plus, X } from 'lucide-react';
 import { Exercicio } from '@/types';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 interface ExercicioFormProps {
   exercicio: Exercicio;
@@ -23,35 +23,84 @@ export function ExercicioForm({
   onRemove,
   isJunto = false
 }: ExercicioFormProps) {
+  const [minutos, setMinutos] = useState(0);
+  const [segundos, setSegundos] = useState(0);
+
+  // Inicializar minutos e segundos do tempoSegundos existente
+  useEffect(() => {
+    if (exercicio.tempoSegundos) {
+      const mins = Math.floor(exercicio.tempoSegundos / 60);
+      const secs = exercicio.tempoSegundos % 60;
+      setMinutos(mins);
+      setSegundos(secs);
+    }
+  }, []);
+
   // Garantir que séries e repetições tenham o mesmo tamanho ao montar
   useEffect(() => {
-    if (!exercicio.series || !exercicio.repeticoes) {
-      // Inicializar com valores padrão se não existirem
-      onChange({
-        ...exercicio,
-     series: exercicio.series || [10],
-        repeticoes: exercicio.repeticoes || [10]
-      });
-    } else if (exercicio.series.length !== exercicio.repeticoes.length) {
-    // Sincronizar tamanhos se forem diferentes
- const maxLength = Math.max(exercicio.series.length, exercicio.repeticoes.length);
-      const newSeries = [...exercicio.series];
-      const newRepeticoes = [...exercicio.repeticoes];
-  
-    // Preencher com valores padrão até terem o mesmo tamanho
-  while (newSeries.length < maxLength) newSeries.push(10);
-      while (newRepeticoes.length < maxLength) newRepeticoes.push(10);
- 
-      onChange({
- ...exercicio,
-        series: newSeries,
-        repeticoes: newRepeticoes
-      });
+    if (!exercicio.tipo || exercicio.tipo === 'series') {
+      if (!exercicio.series || !exercicio.repeticoes) {
+        // Inicializar com valores padrão se não existirem
+        onChange({
+          ...exercicio,
+          tipo: 'series',
+          series: exercicio.series || [10],
+          repeticoes: exercicio.repeticoes || [10]
+        });
+      } else if (exercicio.series.length !== exercicio.repeticoes.length) {
+        // Sincronizar tamanhos se forem diferentes
+        const maxLength = Math.max(exercicio.series.length, exercicio.repeticoes.length);
+        const newSeries = [...exercicio.series];
+        const newRepeticoes = [...exercicio.repeticoes];
+    
+        // Preencher com valores padrão até terem o mesmo tamanho
+        while (newSeries.length < maxLength) newSeries.push(10);
+        while (newRepeticoes.length < maxLength) newRepeticoes.push(10);
+   
+        onChange({
+          ...exercicio,
+          tipo: 'series',
+          series: newSeries,
+          repeticoes: newRepeticoes
+        });
+      }
     }
   }, []);
 
   const updateField = <K extends keyof Exercicio>(field: K, value: Exercicio[K]) => {
     onChange({ ...exercicio, [field]: value });
+  };
+
+  const updateTipoExercicio = (novoTipo: 'series' | 'tempo') => {
+    if (novoTipo === 'series') {
+      onChange({
+        ...exercicio,
+        tipo: 'series',
+        series: exercicio.series?.length ? exercicio.series : [10],
+        repeticoes: exercicio.repeticoes?.length ? exercicio.repeticoes : [10],
+        tempoSegundos: undefined
+      });
+      setMinutos(0);
+      setSegundos(0);
+    } else {
+      onChange({
+        ...exercicio,
+        tipo: 'tempo',
+        tempoSegundos: (minutos * 60) + segundos || 300, // 5 min default
+        series: [],
+        repeticoes: []
+      });
+    }
+  };
+
+  const updateTempo = (mins: number, secs: number) => {
+    setMinutos(mins);
+    setSegundos(secs);
+    const totalSegundos = (mins * 60) + secs;
+    onChange({
+      ...exercicio,
+      tempoSegundos: totalSegundos
+    });
   };
 
   const updateSeries = (idx: number, value: string) => {
@@ -180,58 +229,122 @@ const removeSerie = (idx: number) => {
             </div>
           </div>
 
-          {/* Séries e Repetições */}
+          {/* Tipo de Exercício */}
           <div>
-    <div className="flex items-center justify-between mb-2">
-    <label className="block text-sm font-medium text-gray-700">
-        Séries e Repetições * (Total: {exercicio.series?.length || 0})
-          </label>
-      <button
-            type="button"
-       onClick={addSerie}
-        className="text-sm text-blue-600 hover:text-blue-700 hover:underline flex items-center gap-1 cursor-pointer"
-   >
-       <Plus size={14} />
-    Adicionar série
-              </button>
-   </div>
-
-            <div className="space-y-2">
-    {(exercicio.series || []).map((serie, idx) => (
-        <div key={idx} className="flex items-center gap-2">
-       <span className="text-sm text-gray-600 w-16">Série {idx + 1}:</span>
-                  <input
-              type="number"
-        min="1"
-            value={serie}
-      onChange={(e) => updateSeries(idx, e.target.value)}
-     className="w-20 px-3 py-1 border border-gray-300 rounded-lg"
-  placeholder="10"
-         />
-        <span className="text-sm text-gray-600">x</span>
-  <input
-      type="number"
-   min="1"
-            value={exercicio.repeticoes?.[idx] || 10}
-      onChange={(e) => updateRepeticoes(idx, e.target.value)}
- className="w-20 px-3 py-1 border border-gray-300 rounded-lg"
-        placeholder="12"
-         />
-    <span className="text-sm text-gray-600">reps</span>
-    {exercicio.series.length > 1 && (
-       <button
-      type="button"
-  onClick={() => removeSerie(idx)}
-         className="text-red-600 hover:bg-red-50 p-1 rounded cursor-pointer"
-            title="Remover série"
-      >
-            <X size={16} />
-           </button>
-          )}
-                </div>
-      ))}
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Tipo de Exercício *
+            </label>
+            <div className="flex gap-4">
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="radio"
+                  name={`tipo-${index}`}
+                  value="series"
+                  checked={!exercicio.tipo || exercicio.tipo === 'series'}
+                  onChange={() => updateTipoExercicio('series')}
+                  className="mr-2"
+                />
+                <span className="text-sm text-gray-700">Séries e Repetições</span>
+              </label>
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="radio"
+                  name={`tipo-${index}`}
+                  value="tempo"
+                  checked={exercicio.tipo === 'tempo'}
+                  onChange={() => updateTipoExercicio('tempo')}
+                  className="mr-2"
+                />
+                <span className="text-sm text-gray-700">Por Tempo</span>
+              </label>
             </div>
-    </div>
+          </div>
+
+          {/* Séries e Repetições - só mostrar se tipo for 'series' */}
+          {(!exercicio.tipo || exercicio.tipo === 'series') && (
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Séries e Repetições * (Total: {exercicio.series?.length || 0})
+                </label>
+                <button
+                  type="button"
+                  onClick={addSerie}
+                  className="text-sm text-blue-600 hover:text-blue-700 hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <Plus size={14} />
+                  Adicionar série
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                {(exercicio.series || []).map((serie, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600 w-16">Série {idx + 1}:</span>
+                    <input
+                      type="number"
+                      min="1"
+                      value={serie}
+                      onChange={(e) => updateSeries(idx, e.target.value)}
+                      className="w-20 px-3 py-1 border border-gray-300 rounded-lg"
+                      placeholder="10"
+                    />
+                    <span className="text-sm text-gray-600">x</span>
+                    <input
+                      type="number"
+                      min="1"
+                      value={exercicio.repeticoes?.[idx] || 10}
+                      onChange={(e) => updateRepeticoes(idx, e.target.value)}
+                      className="w-20 px-3 py-1 border border-gray-300 rounded-lg"
+                      placeholder="12"
+                    />
+                    <span className="text-sm text-gray-600">reps</span>
+                    {exercicio.series.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeSerie(idx)}
+                        className="text-red-600 hover:bg-red-50 p-1 rounded cursor-pointer"
+                        title="Remover série"
+                      >
+                        <X size={16} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Tempo - só mostrar se tipo for 'tempo' */}
+          {exercicio.tipo === 'tempo' && (
+          <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+                Duração do Exercício *
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min="0"
+                  max="99"
+                  value={minutos}
+                  onChange={(e) => updateTempo(Number(e.target.value), segundos)}
+                  className="w-20 px-3 py-2 border border-gray-300 rounded-lg"
+                  placeholder="0"
+                />
+                <span className="text-sm text-gray-700">min</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="59"
+                  value={segundos}
+                  onChange={(e) => updateTempo(minutos, Number(e.target.value))}
+                  className="w-20 px-3 py-2 border border-gray-300 rounded-lg"
+                  placeholder="0"
+                />
+                <span className="text-sm text-gray-700">seg</span>
+              </div>
+            </div>
+          )}
 
   {/* Detalhes */}
           <div>
