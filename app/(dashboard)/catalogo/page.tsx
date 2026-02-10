@@ -18,6 +18,10 @@ interface ObjetivoForm {
 
 interface EquipamentoForm {
   nome: string;
+  midia: {
+    tipo: 'imagem' | 'video' | 'nenhum';
+    url: string;
+  };
 }
 
 export default function CatalogoPage() {
@@ -54,7 +58,11 @@ export default function CatalogoPage() {
   });
 
   const [formEquipamento, setFormEquipamento] = useState<EquipamentoForm>({
-    nome: ''
+    nome: '',
+    midia: {
+      tipo: 'nenhum',
+      url: ''
+    }
   });
 
   useEffect(() => {
@@ -132,10 +140,16 @@ export default function CatalogoPage() {
   // Handlers Equipamentos
 const abrirModalEquipamento = (equipamento?: Equipamento) => {
     if (equipamento) {
-      setFormEquipamento({ nome: equipamento.nome });
+      setFormEquipamento({ 
+        nome: equipamento.nome,
+        midia: equipamento.midia || { tipo: 'nenhum', url: '' }
+      });
       setModalEquipamento({ isOpen: true, equipamento, modo: 'editar' });
     } else {
-      setFormEquipamento({ nome: '' });
+      setFormEquipamento({ 
+        nome: '',
+        midia: { tipo: 'nenhum', url: '' }
+      });
       setModalEquipamento({ isOpen: true, equipamento: null, modo: 'criar' });
     }
   };
@@ -331,6 +345,15 @@ setModalExcluir(null);
           </span>
       </div>
 
+                  {equipamento.midia && equipamento.midia.tipo !== 'nenhum' && (
+                    <div className="mt-2 text-sm text-gray-600">
+                      <span className="inline-flex items-center gap-1">
+                        {equipamento.midia.tipo === 'imagem' ? '📷' : '🎥'}
+                        <span className="text-blue-600">{equipamento.midia.tipo === 'imagem' ? 'Imagem' : 'Vídeo'} disponível</span>
+                      </span>
+                    </div>
+                  )}
+
                   {podeEditar && (
     <div className="flex gap-2 mt-3 pt-3 border-t">
           <button
@@ -454,6 +477,79 @@ setModalExcluir(null);
    placeholder="Ex: Leg Press, Supino, etc."
    />
     </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Tipo de Mídia
+            </label>
+            <div className="flex gap-4">
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="tipoMidia"
+                  value="nenhum"
+                  checked={formEquipamento.midia.tipo === 'nenhum'}
+                  onChange={(e) => setFormEquipamento({ 
+                    ...formEquipamento, 
+                    midia: { tipo: e.target.value as 'nenhum', url: '' } 
+                  })}
+                  className="mr-2"
+                />
+                Nenhum
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="tipoMidia"
+                  value="imagem"
+                  checked={formEquipamento.midia.tipo === 'imagem'}
+                  onChange={(e) => setFormEquipamento({ 
+                    ...formEquipamento, 
+                    midia: { ...formEquipamento.midia, tipo: e.target.value as 'imagem' } 
+                  })}
+                  className="mr-2"
+                />
+                Imagem
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="tipoMidia"
+                  value="video"
+                  checked={formEquipamento.midia.tipo === 'video'}
+                  onChange={(e) => setFormEquipamento({ 
+                    ...formEquipamento, 
+                    midia: { ...formEquipamento.midia, tipo: e.target.value as 'video' } 
+                  })}
+                  className="mr-2"
+                />
+                Vídeo
+              </label>
+            </div>
+          </div>
+
+          {formEquipamento.midia.tipo !== 'nenhum' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                URL da {formEquipamento.midia.tipo === 'imagem' ? 'Imagem' : 'Vídeo'} *
+              </label>
+              <input
+                type="url"
+                value={formEquipamento.midia.url}
+                onChange={(e) => setFormEquipamento({ 
+                  ...formEquipamento, 
+                  midia: { ...formEquipamento.midia, url: e.target.value } 
+                })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder={formEquipamento.midia.tipo === 'imagem' 
+                  ? 'Ex: https://exemplo.com/imagem.jpg' 
+                  : 'Ex: https://youtube.com/watch?v=...'}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Cole a URL da {formEquipamento.midia.tipo === 'imagem' ? 'imagem' : 'vídeo do YouTube ou outro site'}
+              </p>
+            </div>
+          )}
 
           <div className="flex gap-3 justify-end pt-4 border-t">
      <button

@@ -10,6 +10,10 @@ export interface Equipamento {
   _id: string;
   nome: string;
   ativo: boolean;
+  midia?: {
+    tipo: 'imagem' | 'video' | 'nenhum';
+    url: string;
+  };
 }
 
 export interface Exercicio {
