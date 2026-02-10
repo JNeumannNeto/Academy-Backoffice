@@ -48,7 +48,7 @@ export default function FichasPage() {
 
     try {
       setExcluindo(fichaId);
-      const { data } = await api.delete(`/api/fichas/${fichaId}`);
+      const { data } = await api.delete(`/api/fichas/${fichaId}?permanente=true`);
       if (data.sucesso) {
         // Recarregar lista
         await carregarFichas();
@@ -166,8 +166,12 @@ export default function FichasPage() {
 return (
        <div
         key={ficha._id}
-  className={`bg-white rounded-lg shadow hover:shadow-lg transition p-6 border-l-4 ${
-    isVencida ? 'border-red-500' : ficha.ativa ? 'border-green-500' : 'border-gray-300'
+  className={`rounded-lg shadow hover:shadow-lg transition p-6 border-l-4 ${
+    isVencida 
+      ? 'border-red-500 bg-white' 
+      : ficha.ativa 
+        ? 'border-green-500 bg-white' 
+        : 'border-gray-300 bg-green-50'
       }`}
     >
    {/* Header do Card */}

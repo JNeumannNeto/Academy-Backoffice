@@ -45,7 +45,7 @@ const router = useRouter();
 
     try {
       setExcluindo(true);
-      const { data } = await api.delete(`/api/fichas/${id}`);
+      const { data } = await api.delete(`/api/fichas/${id}?permanente=true`);
       if (data.sucesso) {
         router.push('/fichas');
       }
