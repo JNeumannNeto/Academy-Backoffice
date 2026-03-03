@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../Academy-EffortApp"
+		},
+		{
+			"path": "../Academy-Server"
+		},
+		{
+			"path": "../../Xadrez/Neumann-Blind-Chess"
+		},
+		{
+			"path": "../../Xadrez/Neumann-Blind-Chess/Blind-Chess-Server"
+		}
+	]
+}
