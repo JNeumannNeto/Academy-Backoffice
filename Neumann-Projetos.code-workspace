@@ -9,5 +9,8 @@
 		{
 			"path": "../../Xadrez"
 		}
-	]
+	],
+	"settings": {
+		"powershell.cwd": "Evolution"
+	}
 }
